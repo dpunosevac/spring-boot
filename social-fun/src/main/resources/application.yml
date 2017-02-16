@@ -1,0 +1,24 @@
+spring:
+  profiles:
+    active: dev
+---
+spring:
+  profiles: dev-with-data
+  datasource:
+    platform: load
+    url: jdbc:postgresql://localhost:5432/sf
+    username: socialfun
+    password: p4SSword1234
+    initialize: true
+  jpa:
+    show-sql: true
+---
+spring:
+  profiles: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sf
+    username: socialfun
+    password: p4SSword1234
+    initialize: true
+  jpa:
+    show-sql: true
