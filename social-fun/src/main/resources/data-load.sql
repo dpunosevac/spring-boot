@@ -11,10 +11,10 @@ INSERT INTO post
 VALUES(1, 'Test', now(), 1);
 
 INSERT INTO post
-VALUES(2, 'Test1', now(), 1);
+VALUES(2, 'Test1', now(), 2);
 
 INSERT INTO comment
-VALUES(3, 'Proba', now(), 2, 1);
+VALUES(2, 'Proba', now(), 2, 1);
 
 INSERT INTO comment
 VALUES(1, 'Proba1', now(), 3, 2);

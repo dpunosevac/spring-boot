@@ -23,9 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/posts")
 @ExposesResourceFor(PostResource.class)
-@Transactional
 public class PostController implements IPostController {
-	
+
 	private final PostRepository postRepository;
 	private final PostResourceAssembler postResourceAssembler;
 
@@ -37,6 +36,7 @@ public class PostController implements IPostController {
 
 	@Override
 	@RequestMapping(method = RequestMethod.GET)
+	@Transactional(readOnly = true)
 	public ResponseEntity<Resources<PostResource>> listAll() {
 		final Iterable<Post> posts = postRepository.findAll();
 		final Resources<PostResource> resources = postResourceAssembler.toEmbeddedList(posts);
@@ -49,57 +49,59 @@ public class PostController implements IPostController {
 
 	@Override
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@Transactional(readOnly = true)
 	public ResponseEntity<PostResource> findOne(@PathVariable long id) {
 		final Post post = postRepository.findOne(id);
 		final PostResource resource = postResourceAssembler.toResource(post);
-		
+
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		
- 		return new ResponseEntity<PostResource>(resource, httpHeaders, HttpStatus.OK);
+
+		return new ResponseEntity<PostResource>(resource, httpHeaders, HttpStatus.OK);
 	}
 
 	@Override
 	@RequestMapping(method = RequestMethod.POST)
+	@Transactional
 	public ResponseEntity<PostResource> create(@RequestBody Post input) {
 		input.setComments(PropertyUtil.checkList(input.getComments()));
-		
+
 		final Post post = postRepository.save(input);
 		final PostResource resource = postResourceAssembler.toResource(post);
-		
+
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		
+
 		return new ResponseEntity<PostResource>(resource, httpHeaders, HttpStatus.CREATED);
 	}
 
 	@Override
-//	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<PostResource> update(@PathVariable long id, Post input) {
-		if(!postRepository.exists(id)){
+	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+	@Transactional
+	public ResponseEntity<PostResource> update(@PathVariable long id, @RequestBody Post input) {
+		if (!postRepository.exists(id)) {
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-			
+
 			return new ResponseEntity<>(httpHeaders, HttpStatus.BAD_REQUEST);
 		}
-		
-		input.setId(id);
-		input.setComments(PropertyUtil.checkList(input.getComments()));
-		
-		final Post post = postRepository.save(input);
+
+		final Post post = postRepository.findOne(id);
+		PropertyUtil.getNullProperties(input, post);
+		postRepository.save(post);
 		final PostResource resource = postResourceAssembler.toResource(post);
-		
+
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		
+
 		return new ResponseEntity<PostResource>(resource, httpHeaders, HttpStatus.OK);
 	}
 
 	@Override
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	@Transactional
 	public ResponseEntity<PostResource> delete(@PathVariable long id) {
-		postRepository.delete(id);
-		
+
 		return new ResponseEntity<PostResource>(HttpStatus.OK);
 	}
 }

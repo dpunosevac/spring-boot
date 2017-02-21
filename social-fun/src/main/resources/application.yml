@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: dev-with-data
 ---
 spring:
   profiles: dev-with-data

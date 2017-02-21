@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/users")
 @ExposesResourceFor(UserResource.class)
-@Transactional
 public class UserController implements IUserController {
 
 	private final UserRepository userRepository;
@@ -37,6 +36,7 @@ public class UserController implements IUserController {
 
 	@Override
 	@RequestMapping(method = RequestMethod.GET)
+	@Transactional(readOnly = true)
 	public ResponseEntity<Resources<UserResource>> listAll() {
 		final Iterable<User> users = userRepository.findAll();
 		final Resources<UserResource> resources = userResourceAssembler.toEmbeddedList(users);
@@ -49,6 +49,7 @@ public class UserController implements IUserController {
 
 	@Override
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@Transactional(readOnly = true)
 	public ResponseEntity<UserResource> findOne(@PathVariable long id) {
 		final User user = userRepository.findOne(id);
 		final UserResource resource = userResourceAssembler.toResource(user);
@@ -61,6 +62,7 @@ public class UserController implements IUserController {
 
 	@Override
 	@RequestMapping(method = RequestMethod.POST)
+	@Transactional
 	public ResponseEntity<UserResource> create(@RequestBody User input) {
 
 		input.setPosts(PropertyUtil.checkList(input.getPosts()));
@@ -76,8 +78,9 @@ public class UserController implements IUserController {
 	}
 
 	@Override
-//	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<UserResource> update(@PathVariable long id, User input) {
+	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+	@Transactional
+	public ResponseEntity<UserResource> update(@PathVariable long id, @RequestBody User input) {
 		if (!userRepository.exists(id)) {
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -85,11 +88,9 @@ public class UserController implements IUserController {
 			return new ResponseEntity<>(httpHeaders, HttpStatus.BAD_REQUEST);
 		}
 
-		input.setId(id);
-		input.setPosts(PropertyUtil.checkList(input.getPosts()));
-		input.setComments(PropertyUtil.checkList(input.getComments()));
-
-		final User user = userRepository.save(input);
+		final User user = userRepository.findOne(id);
+		PropertyUtil.getNullProperties(input, user);
+		userRepository.save(user);
 		final UserResource resource = userResourceAssembler.toResource(user);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -100,6 +101,7 @@ public class UserController implements IUserController {
 
 	@Override
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	@Transactional
 	public ResponseEntity<UserResource> delete(@PathVariable final long id) {
 		userRepository.delete(id);
 

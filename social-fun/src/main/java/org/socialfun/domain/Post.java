@@ -3,6 +3,7 @@ package org.socialfun.domain;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -72,7 +73,7 @@ public class Post {
 		this.user = user;
 	}
 
-	@OneToMany(mappedBy = "post")
+	@OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
 	public List<Comment> getComments() {
 		return comments;
 	}

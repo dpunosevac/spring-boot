@@ -2,12 +2,10 @@ package org.socialfun.api.resources;
 
 import java.util.Date;
 
-import org.socialfun.utils.CustomJsonDateDeserializer;
 import org.socialfun.utils.CustomJsonDateTimeSerializer;
 import org.springframework.hateoas.core.Relation;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
